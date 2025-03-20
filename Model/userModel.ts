@@ -59,3 +59,23 @@ const patchUserById = async(id: string, updates: Partial<ecomUser>): Promise<voi
     const user = await queryHandeler(`UPDATE ecomUser SET ${fieldNames[0]} = $1 WHERE id = $2`, [fieldValues[0], id])
     return user.rows[0]
 }
+
+
+const updateUserById = async(id: string, updates: Partial<ecomUser>): Promise<QueryResult<any>> =>{
+
+    const fieldNames = Object.keys(updates)
+    if(fieldNames.length === 0){
+        throw new Error("No Data Found")
+    }
+
+    const fieldValues = Object.values(updates)
+    if(fieldValues.length === 0){
+        throw new Error("No Data Found")
+    }
+
+    const keyMap = fieldNames.map((fields, index) => `${fields} = $${index + 1}`).join(", ")
+
+    const user = await queryHandeler(`UPDATE ecomUser SET ${keyMap} WHERE id = $${fieldNames.length + 1} RETURNING *`, [...fieldValues, id])
+    return user.rows[0]
+
+}

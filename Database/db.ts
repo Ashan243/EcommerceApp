@@ -28,6 +28,7 @@ const executeSetup = async() =>{
             }
             FileName = data.toString()
             connectionPool.query(FileName)
+            console.log(FileName)
         })
     } catch (error) {
         console.log("Error executing SQL setup")
