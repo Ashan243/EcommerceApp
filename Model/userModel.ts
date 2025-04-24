@@ -6,7 +6,13 @@ import bcrypt from "bcrypt"
 import cuid from "cuid"
 
 
-export interface ecomUser{
+
+//1. Basket - Processing a basket received from the client
+//2. Send response back to the user + add the neccessary order info to the database
+//basket Model
+//user model + RBAC
+//item model
+export interface Users{
 
     id: string
     name: string
@@ -16,14 +22,14 @@ export interface ecomUser{
 }
 
 
-const getAllUsers = async(): Promise<ecomUser[]> =>{
-    const user = await connectionPool.query("SELECT * FROM ecomUser")
+const getAllUsers = async(): Promise<Users[]> =>{
+    const user = await connectionPool.query("SELECT * FROM Users")
     return user.rows
 }
 
 
 
-const userSignup = async(userData: ecomUser): Promise<QueryResult<ecomUser>> =>{
+const usersignup = async(userData: Users): Promise<QueryResult<Users>> =>{
 
     const {name, username, email, password} = userData
     const id = cuid()
@@ -36,13 +42,13 @@ const userSignup = async(userData: ecomUser): Promise<QueryResult<ecomUser>> =>{
 }
 
 
-const findUserById = async(id: string): Promise<QueryResult<ecomUser>> =>{
-    const user = await queryHandeler("SELECT * FROM ecomUser WHERE id = $1", [id])
+const findUserById = async(id: string): Promise<QueryResult<Users>> =>{
+    const user = await queryHandeler("SELECT * FROM Users WHERE id = $1", [id])
     return user.rows[0]
 }
 
 
-const patchUserById = async(id: string, updates: Partial<ecomUser>): Promise<void | QueryResult<any>> =>{
+const patchUserById = async(id: string, updates: Partial<Users>): Promise<void | QueryResult<any>> =>{
 
     const fieldNames = Object.keys(updates)
 
@@ -56,12 +62,12 @@ const patchUserById = async(id: string, updates: Partial<ecomUser>): Promise<voi
         throw new Error("No Data Found")
     }
 
-    const user = await queryHandeler(`UPDATE ecomUser SET ${fieldNames[0]} = $1 WHERE id = $2`, [fieldValues[0], id])
+    const user = await queryHandeler(`UPDATE Users SET ${fieldNames[0]} = $1 WHERE id = $2`, [fieldValues[0], id])
     return user.rows[0]
 }
 
 
-const updateUserById = async(id: string, updates: Partial<ecomUser>): Promise<QueryResult<any>> =>{
+const updateUserById = async(id: string, updates: Partial<Users>): Promise<QueryResult<any>> =>{
 
     const fieldNames = Object.keys(updates)
     if(fieldNames.length === 0){
@@ -73,9 +79,34 @@ const updateUserById = async(id: string, updates: Partial<ecomUser>): Promise<Qu
         throw new Error("No Data Found")
     }
 
-    const keyMap = fieldNames.map((fields, index) => `${fields} = $${index + 1}`).join(", ")
+    const keyMap = fieldNames.map((fields, index) => `${fields} = $${index + 1}`).join(", ") //$1, $2, $3
+    // email = "ash321@gmail.com", mobile = "+1 918 342 213", username = "Ash321" WHERE id = $4
 
-    const user = await queryHandeler(`UPDATE ecomUser SET ${keyMap} WHERE id = $${fieldNames.length + 1} RETURNING *`, [...fieldValues, id])
+    const user = await queryHandeler(`UPDATE Users SET ${keyMap} WHERE id = $${fieldNames.length + 1} RETURNING *`, [...fieldValues, id])
     return user.rows[0]
 
+}
+
+
+
+const deleteByEmail = async(email: string): Promise<void> =>{
+
+    if(email.includes("@")){
+        await queryHandeler("DELETE FROM users WHERE email = $1 RETURNING *", [email]) 
+    }
+
+    console.log("email must contain an @")
+
+}
+
+
+
+export {
+
+    findUserById,
+    patchUserById,
+    updateUserById,
+    deleteByEmail,
+    usersignup,
+    getAllUsers
 }

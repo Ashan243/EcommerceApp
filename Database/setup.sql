@@ -1,5 +1,5 @@
 
-CREATE TABLE ecomUser(
+CREATE TABLE users (
 
 id VARCHAR(30) PRIMARY KEY
 name VARCHAR(255) 
