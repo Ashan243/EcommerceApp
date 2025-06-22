@@ -1,10 +1,9 @@
+CREATE TABLE IF NOT EXISTS ecomuser (
 
-CREATE TABLE users (
-
-id VARCHAR(30) PRIMARY KEY
-name VARCHAR(255) 
-username VARCHAR(255) 
-email VARCHAR(255) 
+id VARCHAR(30) PRIMARY KEY,
+name VARCHAR(255), 
+username VARCHAR(255),
+email VARCHAR(255),
 password VARCHAR(255) 
 
 )

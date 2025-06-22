@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt"
-import { queryHandeler } from "../Database/db"
+import { queryHandler } from "../Database/db"
 import { Users } from "../Model/userModel"
 
 export class AuthService{
@@ -7,7 +7,7 @@ export class AuthService{
     static async userLogin(userData: {email: string, password: string}){
 
         try {
-            const user = await queryHandeler("SELECT * FROM users WHERE id = $1", [userData.email])
+            const user = await queryHandler("SELECT * FROM users WHERE id = $1", [userData.email])
             if(user.rowCount === 0){
                 throw new Error("Incorrect email or password")
             }

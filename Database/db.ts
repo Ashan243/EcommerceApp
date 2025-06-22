@@ -20,16 +20,17 @@ export const connectionPool = new Pool({
 })
 
 const executeSetup = async() =>{
-    let FileName: string
+    let fileName: string
     try {
-        let setFilePath = path.join(__dirname, `setup.sql`)
-        fs.readFile(setFilePath, (err, data) =>{
+        let setFilePath = await path.join(__dirname, `setup.sql`)
+        
+        await fs.readFile(setFilePath, (err, data) =>{
             if(err){
                 throw new Error(err.message)
             }
-            FileName = data.toString()
-            connectionPool.query(FileName)
-            console.log(FileName)
+            fileName = data.toString()
+            connectionPool.query(fileName)
+            
         })
     } catch (error) {
         console.log("Error executing SQL setup")
@@ -38,20 +39,23 @@ const executeSetup = async() =>{
 }
 
 
-const existsLogic = `SELECT EXISTS (SELECT FROM Schemas.table WHERE users = 'users')`
-export const queryHandeler = (query: string, params?: any[]) => connectionPool.query(query, params)
+
+export const queryHandler = (query: string, params?: any[]) => connectionPool.query(query, params)
 
 
-connectionPool.once("intialise",async() =>{
-    await executeSetup()
-})
+
 connectionPool.on("connect", async() =>{
     console.log("Connected to PostGres")
-    const query = await queryHandeler(existsLogic)
+    const checkTable = "SELECT * FROM ecomuser"
+    const query = await queryHandler(checkTable)
 
-    if(!query){
-        executeSetup()
+    if(query.rowCount === 0){
+        await executeSetup()
+        
     }
+
+    
+
 })
 
 connectionPool.on("error", async(error) =>{
